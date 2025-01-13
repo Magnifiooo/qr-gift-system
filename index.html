@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gift QR Scanner</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
+    <style>
+        body { 
+            font-family: Arial; 
+            max-width: 800px; 
+            margin: 2rem auto; 
+            padding: 1rem;
+            text-align: center;
+        }
+        #reader { 
+            width: 400px; 
+            margin: 0 auto; 
+        }
+        .error { color: red; }
+        .success { color: green; }
+        #loading { display: none; }
+    </style>
+</head>
+<body>
+    <h1>Gift QR Scanner</h1>
+    <div id="reader"></div>
+    <div id="loading">Verifying...</div>
+    <p id="message"></p>
+
+    <script>
+        // Replace with your Render backend URL
+        const API_URL = 'https://your-backend-url.onrender.com';
+
+        async function onScanSuccess(decodedText) {
+            const messageElement = document.getElementById('message');
+            const loadingElement = document.getElementById('loading');
+            
+            try {
+                loadingElement.style.display = 'block';
+                messageElement.textContent = '';
+
+                const response = await fetch(`${API_URL}/api/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code: decodedText })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error);
+                }
+
+                messageElement.className = 'success';
+                messageElement.textContent = 'Gift claimed successfully!';
+            } catch (error) {
+                messageElement.className = 'error';
+                messageElement.textContent = error.message;
+            } finally {
+                loadingElement.style.display = 'none';
+            }
+        }
+
+        const html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render(onScanSuccess);
+    </script>
+</body>
+</html>
