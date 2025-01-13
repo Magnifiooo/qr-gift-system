@@ -1,0 +1,7 @@
+qr-gift-system/
+├── backend/
+│   ├── server.js
+│   ├── package.json
+│   └── .env
+└── frontend/
+    └── index.html
